@@ -253,10 +253,11 @@ The key takeaway is that prediction-only can fail badly, while trust-aware fallb
 
 ### 1. Clone the repository
 
+### 1. Clone the repository
+
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/casey2346/trust-aware-learning-augmented-ski-rental.git
 cd trust-aware-learning-augmented-ski-rental
-```
 
 ### 2. Create and activate a Python environment
 
@@ -284,19 +285,26 @@ All main experiments completed successfully.
 
 Run the main Day 8 signed error sweep:
 
+```bash
 PYTHONPATH=. python3 experiments/error_sweep.py
-
+```
 Run the Day 8 adversarial test:
 
+```bash
 PYTHONPATH=. python3 experiments/adversarial_test.py
+```
 
 Run Day 9 report-ready figures:
 
+```bash
 PYTHONPATH=. python3 experiments/day9_make_figures.py
+```
 
 Run Day 10 adversarial prediction failure experiment:
 
+```bash
 PYTHONPATH=. python3 experiments/day10_adversarial_prediction_failure.py
+```
 
 ---
 
@@ -319,7 +327,6 @@ trust-aware-learning-augmented-ski-rental/
 │   ├── day5_learning_augmented_curve.py
 │   ├── day6_trust_aware_curve.py
 │   ├── error_sweep.py
-│   ├── signed_error_sweep.py
 │   ├── day9_make_figures.py
 │   ├── day10_adversarial_prediction_failure.py
 │   ├── adversarial_test.py
@@ -368,7 +375,6 @@ src/ski_rental/trust_aware.py
 src/predictors/noise_models.py
 Experiments
 experiments/error_sweep.py
-experiments/signed_error_sweep.py
 experiments/day9_make_figures.py
 experiments/day10_adversarial_prediction_failure.py
 experiments/adversarial_test.py
