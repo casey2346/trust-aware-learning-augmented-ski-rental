@@ -1,8 +1,8 @@
-# Day 3 Prediction-Only Ski Rental Algorithm
+# Prediction-Only Ski Rental Algorithm
 
 ## Objective
 
-Day 3 implements a prediction-only ski rental algorithm.
+Implements a prediction-only ski rental algorithm.
 
 The goal is to show that fully trusting predictions can work very well when predictions are accurate, but can fail badly when predictions are unreliable.
 
@@ -142,7 +142,7 @@ CR_pred = 5
 
 This shows that underestimating the number of skiing days can also cause severe degradation.
 
-Day 3 Outputs
+Outputs
 
 Implemented:
 
@@ -150,9 +150,9 @@ src/ski_rental/prediction_only.py
 
 Generated:
 
-experiments/day3_prediction_only_curve.py
-experiments/results/day3_prediction_only.csv
-figures/day3_prediction_only_cost_ratio.png
+experiments/prediction_only_curve.py
+experiments/results/prediction_only.csv
+figures/prediction_only_cost_ratio.png
 Interpretation
 
 The prediction-only algorithm has strong consistency when predictions are accurate.

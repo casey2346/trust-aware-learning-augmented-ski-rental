@@ -1,5 +1,5 @@
 """
-Day 10: Adversarial prediction failure experiment.
+Adversarial prediction failure experiment.
 
 Goal:
     Show that prediction-only can fail badly under adversarial predictions,
@@ -156,9 +156,9 @@ def evaluate_one_case(
     return rows
 
 
-def run_day10_experiment() -> list[dict[str, float | int | str]]:
+def run_experiment() -> list[dict[str, float | int | str]]:
     """
-    Run Day 10 adversarial prediction failure experiment.
+    Run adversarial prediction failure experiment.
     """
     buy_cost = 10
     lambda_value = 0.5
@@ -319,7 +319,7 @@ def main() -> None:
         project_root
         / "experiments"
         / "results"
-        / "day10_adversarial_prediction_failure.csv"
+        / "adversarial_prediction_failure.csv"
     )
 
     figure_path = (
@@ -328,11 +328,11 @@ def main() -> None:
         / "adversarial_prediction_failure.png"
     )
 
-    rows = run_day10_experiment()
+    rows = run_experiment()
     save_csv(rows, csv_path)
     plot_adversarial_failure(rows, figure_path)
 
-    print("Day 10 adversarial prediction failure experiment completed.")
+    print("adversarial prediction failure experiment completed.")
     print(f"Saved CSV: {csv_path}")
     print(f"Saved figure: {figure_path}")
 

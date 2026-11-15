@@ -49,15 +49,15 @@ def main() -> None:
     Run all main reproducible experiments.
     """
     scripts = [
-        PROJECT_ROOT / "experiments" / "day2_baseline_curve.py",
-        PROJECT_ROOT / "experiments" / "day3_prediction_only_curve.py",
-        PROJECT_ROOT / "experiments" / "day4_noise_models.py",
-        PROJECT_ROOT / "experiments" / "day5_learning_augmented_curve.py",
-        PROJECT_ROOT / "experiments" / "day6_trust_aware_curve.py",
+        PROJECT_ROOT / "experiments" / "baseline_curve.py",
+        PROJECT_ROOT / "experiments" / "prediction_only_curve.py",
+        PROJECT_ROOT / "experiments" / "noise_models.py",
+        PROJECT_ROOT / "experiments" / "learning_augmented_curve.py",
+        PROJECT_ROOT / "experiments" / "trust_aware_curve.py",
         PROJECT_ROOT / "experiments" / "error_sweep.py",
         PROJECT_ROOT / "experiments" / "adversarial_test.py",
-        PROJECT_ROOT / "experiments" / "day9_make_figures.py",
-        PROJECT_ROOT / "experiments" / "day10_adversarial_prediction_failure.py",
+        PROJECT_ROOT / "experiments" / "make_figures.py",
+        PROJECT_ROOT / "experiments" / "adversarial_prediction_failure.py",
     ]
 
     for script in scripts:

@@ -1,8 +1,8 @@
-# Day 5 Learning-Augmented Ski Rental Algorithm
+# Learning-Augmented Ski Rental Algorithm
 
 ## Objective
 
-Day 5 implements a standard learning-augmented ski rental algorithm.
+Implements a standard learning-augmented ski rental algorithm.
 
 The goal is to allow the online algorithm to use a prediction about the unknown number of skiing days.
 
@@ -100,7 +100,7 @@ buy_day = 10
 
 This matches the classical deterministic baseline.
 
-Day 5 Outputs
+Outputs
 
 Implemented:
 
@@ -108,9 +108,9 @@ src/ski_rental/learning_augmented.py
 
 Generated:
 
-experiments/day5_learning_augmented_curve.py
-experiments/results/day5_learning_augmented.csv
-figures/day5_learning_augmented_lambdas.png
+experiments/learning_augmented_curve.py
+experiments/results/learning_augmented.csv
+figures/learning_augmented_lambdas.png
 Interpretation
 
 The learning-augmented algorithm introduces a trade-off:

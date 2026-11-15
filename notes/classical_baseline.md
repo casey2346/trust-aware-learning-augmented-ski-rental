@@ -1,8 +1,8 @@
-# Day 2 Classical Deterministic Baseline
+# Classical Deterministic Baseline
 
 ## Objective
 
-Day 2 implements and evaluates the classical deterministic ski rental algorithm.
+Implements and evaluates the classical deterministic ski rental algorithm.
 
 The goal is to establish a clean baseline before introducing prediction-only, learning-augmented, and trust-aware algorithms.
 
@@ -57,7 +57,7 @@ CR(T, B) = (2B - 1) / B = 2 - 1/B
 
 Thus, the deterministic baseline is at most 2-competitive.
 
-Day 2 Output
+Output
 
 Implemented:
 
@@ -65,8 +65,8 @@ src/ski_rental/baselines.py
 
 Generated:
 
-experiments/results/day2_deterministic_baseline.csv
-figures/day2_deterministic_competitive_ratio.png
+experiments/results/deterministic_baseline.csv
+figures/deterministic_competitive_ratio.png
 Interpretation
 
 The deterministic baseline is robust because its worst-case competitive ratio is bounded by 2.

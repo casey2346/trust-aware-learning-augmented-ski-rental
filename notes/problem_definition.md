@@ -1,4 +1,4 @@
-# Day 1 Problem Definition Notes
+# Problem Definition Notes
 
 ## Objective
 

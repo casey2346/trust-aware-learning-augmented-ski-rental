@@ -1,5 +1,5 @@
 """
-Day 4 experiment: generate predictions from different noise models.
+experiment: generate predictions from different noise models.
 
 This experiment evaluates prediction models for several fixed T, B instances.
 
@@ -40,8 +40,8 @@ def main() -> None:
         )
         all_results.extend(results)
 
-    csv_path = results_dir / "day4_noise_models.csv"
-    figure_path = figures_dir / "day4_noise_models_predictions.png"
+    csv_path = results_dir / "noise_models.csv"
+    figure_path = figures_dir / "noise_models_predictions.png"
 
     with csv_path.open("w", newline="") as f:
         writer = csv.DictWriter(
@@ -86,14 +86,14 @@ def main() -> None:
     plt.axhline(y=buy_cost, linestyle="--", linewidth=1, label="buy cost B")
     plt.xticks(x_values, labels, rotation=60, ha="right")
     plt.ylabel("Number of skiing days")
-    plt.title("Day 4 Prediction Noise Models")
+    plt.title("Prediction Noise Models")
     plt.grid(True, axis="y", alpha=0.3)
     plt.legend()
     plt.tight_layout()
     plt.savefig(figure_path, dpi=200)
     plt.close()
 
-    print("Day 4 noise model experiment completed.")
+    print("noise model experiment completed.")
     print(f"Saved CSV: {csv_path}")
     print(f"Saved figure: {figure_path}")
 

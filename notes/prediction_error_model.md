@@ -1,8 +1,8 @@
-# Day 4 Prediction Error Model
+# Prediction Error Model
 
 ## Objective
 
-Day 4 formalises prediction error for the learning-augmented ski rental project.
+Formalises prediction error for the learning-augmented ski rental project.
 
 The goal is to make the phrase "wrong prediction" mathematically precise and implement several prediction noise models.
 
@@ -30,7 +30,7 @@ T = 2, p = 7  gives  |p - T| = 5, relative error = 2.5
 T = 50, p = 55 gives |p - T| = 5, relative error = 0.1
 Implemented Prediction Models
 
-Day 4 implements six prediction models.
+Implements six prediction models.
 
 1. Exact Prediction
 p = T
@@ -99,7 +99,7 @@ p = 1
 
 This may cause the algorithm to rent for too long.
 
-Day 4 Outputs
+Outputs
 
 Implemented:
 
@@ -107,12 +107,12 @@ src/predictors/noise_models.py
 
 Generated:
 
-experiments/day4_noise_models.py
-experiments/results/day4_noise_models.csv
-figures/day4_noise_models_predictions.png
+experiments/noise_models.py
+experiments/results/noise_models.csv
+figures/noise_models_predictions.png
 Interpretation
 
-Day 4 creates the foundation for later experiments.
+Creates the foundation for later experiments.
 
 The project can now evaluate algorithms under multiple prediction regimes:
 

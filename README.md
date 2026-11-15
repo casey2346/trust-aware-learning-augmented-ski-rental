@@ -199,7 +199,7 @@ p = T · (1 - error_fraction)
 
 The key result is that prediction-only can look strong under overestimation but fails under severe underestimation.
 
-![Signed prediction error sweep](figures/day8_error_sweep.png)
+![Signed prediction error sweep](figures/signed_error_sweep_cost_ratio.png)
 
 ---
 
@@ -253,11 +253,10 @@ The key takeaway is that prediction-only can fail badly, while trust-aware fallb
 
 ### 1. Clone the repository
 
-### 1. Clone the repository
-
 ```bash
 git clone https://github.com/casey2346/trust-aware-learning-augmented-ski-rental.git
 cd trust-aware-learning-augmented-ski-rental
+```
 
 ### 2. Create and activate a Python environment
 
@@ -283,33 +282,40 @@ All main experiments completed successfully.
 
 ### 5. Regenerate key figures individually
 
-Run the main Day 8 signed error sweep:
+Run the signed prediction error sweep:
+
+```bash
+PYTHONPATH=. python3 experiments/signed_error_sweep.py
+```
+
+Run the prediction error sweep:
 
 ```bash
 PYTHONPATH=. python3 experiments/error_sweep.py
 ```
-Run the Day 8 adversarial test:
+Run the adversarial prediction test:
 
 ```bash
 PYTHONPATH=. python3 experiments/adversarial_test.py
 ```
 
-Run Day 9 report-ready figures:
+Generate the report-ready figures:
 
 ```bash
-PYTHONPATH=. python3 experiments/day9_make_figures.py
+PYTHONPATH=. python3 experiments/make_figures.py
 ```
 
-Run Day 10 adversarial prediction failure experiment:
+Run the adversarial prediction failure experiment:
 
 ```bash
-PYTHONPATH=. python3 experiments/day10_adversarial_prediction_failure.py
+PYTHONPATH=. python3 experiments/adversarial_prediction_failure.py
 ```
 
 ---
 
 ## Repository Structure
 
+```text
 trust-aware-learning-augmented-ski-rental/
 ├── src/
 │   ├── ski_rental/
@@ -321,74 +327,64 @@ trust-aware-learning-augmented-ski-rental/
 │   └── predictors/
 │       └── noise_models.py
 ├── experiments/
-│   ├── day2_baseline_curve.py
-│   ├── day3_prediction_only_curve.py
-│   ├── day4_noise_models.py
-│   ├── day5_learning_augmented_curve.py
-│   ├── day6_trust_aware_curve.py
+│   ├── baseline_curve.py
+│   ├── prediction_only_curve.py
+│   ├── noise_models.py
+│   ├── learning_augmented_curve.py
+│   ├── trust_aware_curve.py
 │   ├── error_sweep.py
-│   ├── day9_make_figures.py
-│   ├── day10_adversarial_prediction_failure.py
+│   ├── signed_error_sweep.py
+│   ├── make_figures.py
+│   ├── adversarial_prediction_failure.py
 │   ├── adversarial_test.py
 │   ├── run_all.py
 │   └── results/
 ├── figures/
-│   ├── day2_deterministic_competitive_ratio.png
-│   ├── day3_prediction_only_cost_ratio.png
-│   ├── day4_noise_models_predictions.png
-│   ├── day5_learning_augmented_lambdas.png
-│   ├── day6_trust_aware_fallback.png
-│   ├── day8_error_sweep.png
-│   ├── day8_adversarial_test.png
+│   ├── deterministic_competitive_ratio.png
+│   ├── prediction_only_cost_ratio.png
+│   ├── noise_models_predictions.png
+│   ├── learning_augmented_lambdas.png
+│   ├── trust_aware_fallback.png
+│   ├── error_sweep.png
+│   ├── adversarial_test.png
+│   ├── signed_error_sweep_cost_ratio.png
 │   ├── error_sweep_cost_ratio.png
 │   ├── duration_sweep.png
 │   ├── confidence_ablation.png
 │   └── adversarial_prediction_failure.png
 ├── notes/
-│   ├── day1_problem_definition.md
-│   ├── day2_classical_baseline.md
-│   ├── day3_prediction_only.md
-│   ├── day4_prediction_error_model.md
-│   ├── day5_learning_augmented.md
-│   ├── day6_trust_aware.md
-│   ├── day7_algorithm_blocks.md
-│   ├── day8_experiment_framework.md
-│   ├── day9_first_figures.md
-│   ├── day10_adversarial_prediction_failure.md
+│   ├── problem_definition.md
+│   ├── classical_baseline.md
+│   ├── prediction_only.md
+│   ├── prediction_error_model.md
+│   ├── learning_augmented.md
+│   ├── trust_aware.md
+│   ├── algorithm_blocks.md
+│   ├── experiment_framework.md
+│   ├── first_figures.md
+│   ├── adversarial_prediction_failure.md
 │   ├── signed_error_and_bias_improvement.md
+│   ├── code_cleanup.md
 │   ├── theorem_1_consistency.md
 │   ├── theorem_2_robustness.md
 │   └── theorem_3_counterexample.md
 ├── paper/
 │   ├── algorithm_blocks.md
 │   └── technical_report.md
+├── requirements.txt
 ├── README.md
 └── .gitignore
+```
 
-Main Files
-Core implementation
-src/ski_rental/problem.py
-src/ski_rental/baselines.py
-src/ski_rental/prediction_only.py
-src/ski_rental/learning_augmented.py
-src/ski_rental/trust_aware.py
-src/predictors/noise_models.py
-Experiments
-experiments/error_sweep.py
-experiments/day9_make_figures.py
-experiments/day10_adversarial_prediction_failure.py
-experiments/adversarial_test.py
-experiments/run_all.py
-Main figures
-figures/day8_error_sweep.png
-figures/error_sweep_cost_ratio.png
-figures/duration_sweep.png
-figures/confidence_ablation.png
-figures/adversarial_prediction_failure.png
-Theory notes
-notes/theorem_1_consistency.md
-notes/theorem_2_robustness.md
-notes/theorem_3_counterexample.md
+### Main Files
+
+**Core implementation:** `src/ski_rental/` and `src/predictors/noise_models.py`.
+
+**Experiments:** `experiments/run_all.py`, `experiments/error_sweep.py`, `experiments/signed_error_sweep.py`, `experiments/adversarial_test.py`, `experiments/make_figures.py`, and `experiments/adversarial_prediction_failure.py`.
+
+**Main figures:** `figures/error_sweep.png`, `figures/signed_error_sweep_cost_ratio.png`, `figures/error_sweep_cost_ratio.png`, `figures/duration_sweep.png`, `figures/confidence_ablation.png`, and `figures/adversarial_prediction_failure.png`.
+
+**Theory notes:** `notes/theorem_1_consistency.md`, `notes/theorem_2_robustness.md`, and `notes/theorem_3_counterexample.md`.
 
 ---
 

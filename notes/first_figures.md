@@ -1,8 +1,8 @@
-# Day 9 First Set of Figures
+# First Set of Figures
 
 ## Objective
 
-Day 9 generates the first set of report-ready figures for the ski rental project.
+Generates the first set of report-ready figures for the ski rental project.
 
 The required figures are:
 
@@ -15,7 +15,7 @@ File:
 
 figures/error_sweep_cost_ratio.png
 
-This figure uses the Day 8 error-sweep experiment results.
+This figure uses the error-sweep experiment results.
 
 It plots:
 
@@ -44,7 +44,7 @@ File:
 
 figures/duration_sweep.png
 
-This figure uses the Day 8 adversarial-test results.
+This figure uses the adversarial-test results.
 
 It plots:
 
@@ -60,7 +60,7 @@ File:
 
 figures/confidence_ablation.png
 
-This figure uses the Day 8 adversarial-test results.
+This figure uses the adversarial-test results.
 
 It plots:
 

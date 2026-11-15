@@ -1,5 +1,5 @@
 """
-Day 6 experiment: evaluate trust-aware fallback under adversarial predictions.
+experiment: evaluate trust-aware fallback under adversarial predictions.
 
 The goal is to show that prediction-only can fail badly when predictions are
 wrong, while trust-aware fallback avoids collapse by reducing trust in the
@@ -44,8 +44,8 @@ def main() -> None:
         confidence_values=confidence_values,
     )
 
-    csv_path = results_dir / "day6_trust_aware.csv"
-    figure_path = figures_dir / "day6_trust_aware_fallback.png"
+    csv_path = results_dir / "trust_aware.csv"
+    figure_path = figures_dir / "trust_aware_fallback.png"
 
     with csv_path.open("w", newline="") as f:
         writer = csv.DictWriter(
@@ -103,7 +103,7 @@ def main() -> None:
     plt.savefig(figure_path, dpi=200)
     plt.close()
 
-    print("Day 6 trust-aware experiment completed.")
+    print("trust-aware experiment completed.")
     print(f"Saved CSV: {csv_path}")
     print(f"Saved figure: {figure_path}")
 

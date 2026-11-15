@@ -8,7 +8,7 @@ This file implements the mathematical quantities used throughout the project:
 3. competitive ratio;
 4. classical deterministic baseline.
 
-The implementation is intentionally simple because Day 1 focuses on correct
+The implementation is intentionally simple, focusing on correct
 formal definitions rather than advanced algorithms.
 """
 

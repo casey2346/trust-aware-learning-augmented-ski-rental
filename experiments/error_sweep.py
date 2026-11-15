@@ -1,5 +1,5 @@
 """
-Day 8 experiment: signed prediction error sweep.
+experiment: signed prediction error sweep.
 
 This experiment improves the original error sweep by testing both directions
 of prediction error:
@@ -292,7 +292,7 @@ def plot_error_sweep(
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=4)
     fig.suptitle(
-        "Day 8 Signed Error Sweep: Overestimate vs Underestimate",
+        "Signed Error Sweep: Overestimate vs Underestimate",
         fontsize=14,
     )
     fig.tight_layout(rect=[0, 0.16, 1, 0.92])
@@ -303,14 +303,14 @@ def plot_error_sweep(
 def main() -> None:
     project_root = Path(__file__).resolve().parents[1]
 
-    csv_path = project_root / "experiments" / "results" / "day8_error_sweep.csv"
-    figure_path = project_root / "figures" / "day8_error_sweep.png"
+    csv_path = project_root / "experiments" / "results" / "error_sweep.csv"
+    figure_path = project_root / "figures" / "error_sweep.png"
 
     rows = run_error_sweep()
     save_csv(rows, csv_path)
     plot_error_sweep(rows, figure_path)
 
-    print("Day 8 signed error sweep completed.")
+    print("signed error sweep completed.")
     print(f"Saved CSV: {csv_path}")
     print(f"Saved figure: {figure_path}")
 

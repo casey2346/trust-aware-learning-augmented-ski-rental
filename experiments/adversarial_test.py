@@ -1,5 +1,5 @@
 """
-Day 8 experiment: adversarial prediction test.
+experiment: adversarial prediction test.
 
 This experiment evaluates algorithms under adversarial predictions.
 
@@ -268,7 +268,7 @@ def plot_adversarial_test(
     plt.axhline(y=2.0, linestyle="--", linewidth=1, label="2-competitive reference")
     plt.xlabel("True number of skiing days T")
     plt.ylabel("Cost ratio ALG / OPT")
-    plt.title("Day 8 Adversarial Prediction Test")
+    plt.title("Adversarial Prediction Test")
     plt.grid(True, alpha=0.3)
     plt.legend()
     plt.tight_layout()
@@ -279,14 +279,14 @@ def plot_adversarial_test(
 def main() -> None:
     project_root = Path(__file__).resolve().parents[1]
 
-    csv_path = project_root / "experiments" / "results" / "day8_adversarial_test.csv"
-    figure_path = project_root / "figures" / "day8_adversarial_test.png"
+    csv_path = project_root / "experiments" / "results" / "adversarial_test.csv"
+    figure_path = project_root / "figures" / "adversarial_test.png"
 
     rows = run_adversarial_test()
     save_csv(rows, csv_path)
     plot_adversarial_test(rows, figure_path)
 
-    print("Day 8 adversarial test completed.")
+    print("adversarial test completed.")
     print(f"Saved CSV: {csv_path}")
     print(f"Saved figure: {figure_path}")
 

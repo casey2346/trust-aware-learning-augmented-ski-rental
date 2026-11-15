@@ -1,7 +1,7 @@
 """
 Classical deterministic baseline algorithms for the ski rental problem.
 
-Day 2 focuses on the standard deterministic 2-competitive ski rental algorithm.
+Focuses on the standard deterministic 2-competitive ski rental algorithm.
 
 Convention:
 - Renting costs 1 per day.
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     B = 10
     max_T = 30
 
-    print("Day 2: Classical Deterministic Ski Rental Baseline")
+    print("Classical Deterministic Ski Rental Baseline")
     print(f"Buy cost B = {B}")
     print()
     print("T\tOPT\tALG_det\tCR")

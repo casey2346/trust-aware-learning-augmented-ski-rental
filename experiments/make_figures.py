@@ -1,5 +1,5 @@
 """
-Day 9: Generate the first set of report-ready figures.
+Generate the first set of report-ready figures.
 
 Required figures:
 1. figures/error_sweep_cost_ratio.png
@@ -7,8 +7,8 @@ Required figures:
 3. figures/confidence_ablation.png
 
 Data sources:
-- experiments/results/day8_error_sweep.csv
-- experiments/results/day8_adversarial_test.csv
+- experiments/results/error_sweep.csv
+- experiments/results/adversarial_test.csv
 """
 
 from __future__ import annotations
@@ -38,7 +38,7 @@ def plot_error_sweep_cost_ratio(rows: list[dict[str, str]], figure_path: Path) -
     Figure 1:
     prediction error vs cost ratio
 
-    Uses day8_error_sweep.csv
+    Uses error_sweep.csv
     Restriction:
     - B = 10
     - average over all T
@@ -105,7 +105,7 @@ def plot_duration_sweep(rows: list[dict[str, str]], figure_path: Path) -> None:
     Figure 2:
     true duration T vs cost ratio
 
-    Uses day8_adversarial_test.csv
+    Uses adversarial_test.csv
     Restriction:
     - B = 10
     """
@@ -158,7 +158,7 @@ def plot_confidence_ablation(rows: list[dict[str, str]], figure_path: Path) -> N
     Figure 3:
     confidence level vs cost ratio
 
-    Uses day8_adversarial_test.csv
+    Uses adversarial_test.csv
     Restriction:
     - B = 10
     - average over all T
@@ -219,8 +219,8 @@ def plot_confidence_ablation(rows: list[dict[str, str]], figure_path: Path) -> N
 def main() -> None:
     project_root = Path(__file__).resolve().parents[1]
 
-    error_sweep_csv = project_root / "experiments" / "results" / "day8_error_sweep.csv"
-    adversarial_csv = project_root / "experiments" / "results" / "day8_adversarial_test.csv"
+    error_sweep_csv = project_root / "experiments" / "results" / "error_sweep.csv"
+    adversarial_csv = project_root / "experiments" / "results" / "adversarial_test.csv"
 
     figures_dir = project_root / "figures"
     figures_dir.mkdir(exist_ok=True)
@@ -243,7 +243,7 @@ def main() -> None:
         figures_dir / "confidence_ablation.png",
     )
 
-    print("Day 9 figures generated successfully.")
+    print("figures generated successfully.")
     print(f"Saved: {figures_dir / 'error_sweep_cost_ratio.png'}")
     print(f"Saved: {figures_dir / 'duration_sweep.png'}")
     print(f"Saved: {figures_dir / 'confidence_ablation.png'}")

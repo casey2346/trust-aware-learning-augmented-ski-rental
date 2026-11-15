@@ -1,14 +1,14 @@
-# Day 8 Complete Experiment Framework
+# Complete Experiment Framework
 
 ## Objective
 
-Day 8 builds the complete experiment framework for the trust-aware learning-augmented ski rental project.
+Builds the complete experiment framework for the trust-aware learning-augmented ski rental project.
 
 The goal is to evaluate all implemented algorithms under controlled prediction-error regimes and adversarial prediction regimes.
 
 ## Scripts
 
-Day 8 adds three experiment scripts:
+Adds three experiment scripts:
 
 experiments/error_sweep.py
 experiments/adversarial_test.py
@@ -51,8 +51,8 @@ cost ratio = ALG / OPT
 
 Output:
 
-experiments/results/day8_error_sweep.csv
-figures/day8_error_sweep.png
+experiments/results/error_sweep.csv
+figures/error_sweep.png
 Experiment 2: Adversarial Prediction Test
 
 The adversarial test evaluates robustness when predictions intentionally push algorithms toward the wrong action.
@@ -71,8 +71,8 @@ long season  -> predictor wrongly suggests renting
 
 Output:
 
-experiments/results/day8_adversarial_test.csv
-figures/day8_adversarial_test.png
+experiments/results/adversarial_test.csv
+figures/adversarial_test.png
 Master Runner
 
 The script:

@@ -1,8 +1,8 @@
-# Day 6 Trust-Aware Fallback Algorithm
+# Trust-Aware Fallback Algorithm
 
 ## Objective
 
-Day 6 implements the core trust-aware fallback algorithm.
+Implements the core trust-aware fallback algorithm.
 
 The goal is to avoid blindly trusting predictions.
 
@@ -102,7 +102,7 @@ The trust-aware cost ratio is:
 CR_trust = ALG_trust / OPT
 Adversarial Prediction Model
 
-Day 6 evaluates the algorithm under adversarial predictions.
+Evaluates the algorithm under adversarial predictions.
 
 If:
 
@@ -140,7 +140,7 @@ Therefore, even if the prediction is adversarially wrong, the algorithm does not
 
 This prevents the severe degradation of prediction-only policies.
 
-Day 6 Outputs
+Outputs
 
 Implemented:
 
@@ -148,6 +148,6 @@ src/ski_rental/trust_aware.py
 
 Generated:
 
-experiments/day6_trust_aware_curve.py
-experiments/results/day6_trust_aware.csv
-figures/day6_trust_aware_fallback.png
+experiments/trust_aware_curve.py
+experiments/results/trust_aware.csv
+figures/trust_aware_fallback.png

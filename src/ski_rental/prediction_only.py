@@ -1,7 +1,7 @@
 """
 Prediction-only ski rental algorithm.
 
-Day 3 implements an algorithm that fully trusts the prediction.
+Implements an algorithm that fully trusts the prediction.
 
 Prediction:
     p = predicted number of skiing days

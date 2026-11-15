@@ -1,5 +1,5 @@
 """
-Day 2 experiment: plot the competitive ratio curve for the classical
+experiment: plot the competitive ratio curve for the classical
 deterministic ski rental baseline.
 """
 
@@ -26,8 +26,8 @@ def main() -> None:
 
     rows = deterministic_table(max_days=max_days, buy_cost=buy_cost)
 
-    csv_path = results_dir / "day2_deterministic_baseline.csv"
-    figure_path = figures_dir / "day2_deterministic_competitive_ratio.png"
+    csv_path = results_dir / "deterministic_baseline.csv"
+    figure_path = figures_dir / "deterministic_competitive_ratio.png"
 
     with csv_path.open("w", newline="") as f:
         writer = csv.DictWriter(
@@ -51,7 +51,7 @@ def main() -> None:
     plt.savefig(figure_path, dpi=200)
     plt.close()
 
-    print("Day 2 baseline experiment completed.")
+    print("baseline experiment completed.")
     print(f"Saved CSV: {csv_path}")
     print(f"Saved figure: {figure_path}")
 

@@ -1,7 +1,7 @@
 """
 Trust-aware learning-augmented ski rental algorithm.
 
-Day 6 implements the core trust-aware fallback algorithm.
+Implements the core trust-aware fallback algorithm.
 
 Goal:
     Do not blindly trust predictions.
@@ -389,7 +389,7 @@ if __name__ == "__main__":
     lambda_value = 0.5
     confidence_values = [0.0, 0.25, 0.5, 0.75, 1.0]
 
-    print("Day 6: Trust-Aware Learning-Augmented Ski Rental")
+    print("Trust-Aware Learning-Augmented Ski Rental")
     print(f"Buy cost B = {B}")
     print(f"lambda = {lambda_value}")
     print()

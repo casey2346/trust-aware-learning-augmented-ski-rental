@@ -1,7 +1,7 @@
 """
 Learning-augmented ski rental algorithm.
 
-Day 5 implements a standard learning-augmented version of the ski rental problem.
+Implements a standard learning-augmented version of the ski rental problem.
 
 Prediction:
     p = predicted number of skiing days

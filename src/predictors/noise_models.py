@@ -1,7 +1,7 @@
 """
 Prediction error models for learning-augmented ski rental.
 
-Day 4 formalises what it means for a prediction to be wrong.
+Formalises what it means for a prediction to be wrong.
 
 Definitions:
     T = true number of skiing days
@@ -287,7 +287,7 @@ def generate_all_predictions(
     seed: int = 42,
 ) -> list[PredictionResult]:
     """
-    Generate all Day 4 prediction models for one T, B instance.
+    Generate all prediction models for one T, B instance.
 
     Args:
         true_days: True number of skiing days T.
@@ -313,7 +313,7 @@ if __name__ == "__main__":
     B = 10
     test_values = [3, 8, 10, 30]
 
-    print("Day 4: Prediction Error Models")
+    print("Prediction Error Models")
     print(f"Buy cost B = {B}")
     print()
     print("model\tT\tB\tp\terror\trel_error")

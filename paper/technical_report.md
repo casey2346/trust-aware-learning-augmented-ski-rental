@@ -343,11 +343,11 @@ This improves the original one-sided error sweep, where prediction-only appeared
 
 Output figure:
 
-figures/day8_error_sweep.png
+figures/error_sweep.png
 
 ### 5.2 First Report Figures
 
-Day 9 generates the first report-ready figure set:
+The experiment framework generates the first report-ready figure set:
 
 figures/error_sweep_cost_ratio.png
 figures/duration_sweep.png

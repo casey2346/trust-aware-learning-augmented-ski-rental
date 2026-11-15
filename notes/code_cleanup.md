@@ -1,8 +1,8 @@
-# Day 17 Code Cleanup and Reproducibility
+# Code Cleanup and Reproducibility
 
 ## Objective
 
-Day 17 cleans the project codebase and improves reproducibility.
+Cleans the project codebase and improves reproducibility.
 
 The goal is to make the repository easier for another researcher, mentor, or reviewer to run and understand.
 
@@ -28,7 +28,7 @@ The main scripts use descriptive function names such as:
 
 run_error_sweep
 plot_error_sweep
-run_day10_experiment
+run_experiment
 plot_adversarial_failure
 save_csv
 safe_ratio
@@ -65,8 +65,8 @@ The main experiments can be rerun from the project root using:
 
 PYTHONPATH=. python3 experiments/error_sweep.py
 PYTHONPATH=. python3 experiments/adversarial_test.py
-PYTHONPATH=. python3 experiments/day9_make_figures.py
-PYTHONPATH=. python3 experiments/day10_adversarial_prediction_failure.py
+PYTHONPATH=. python3 experiments/make_figures.py
+PYTHONPATH=. python3 experiments/adversarial_prediction_failure.py
 6. Random Seed
 
 The current experiments are deterministic because they use controlled prediction rules rather than random sampling.
@@ -83,11 +83,11 @@ source .venv/bin/activate
 pip install -r requirements.txt
 PYTHONPATH=. python3 experiments/error_sweep.py
 PYTHONPATH=. python3 experiments/adversarial_test.py
-PYTHONPATH=. python3 experiments/day9_make_figures.py
-PYTHONPATH=. python3 experiments/day10_adversarial_prediction_failure.py
+PYTHONPATH=. python3 experiments/make_figures.py
+PYTHONPATH=. python3 experiments/adversarial_prediction_failure.py
 
 and regenerate the main CSV files and figures.
 
-Day 17 Output
+Output
 requirements.txt
-notes/day17_code_cleanup.md
+notes/code_cleanup.md

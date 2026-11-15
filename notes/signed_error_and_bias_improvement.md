@@ -31,7 +31,7 @@ However, they can fail badly when predictions underestimate a long season.
 
 Therefore, signed error testing gives a more complete picture of robustness.
 
-Updated Day 10 Figure
+Updated Figure
 
 The adversarial prediction failure figure is expanded from three panels to four panels:
 

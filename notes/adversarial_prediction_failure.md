@@ -1,8 +1,8 @@
-# Day 10 Adversarial Prediction Failure Experiment
+# Adversarial Prediction Failure Experiment
 
 ## Objective
 
-Day 10 evaluates adversarial prediction failures.
+Evaluates adversarial prediction failures.
 
 The goal is to show that prediction-only algorithms can fail badly when predictions are wrong, while trust-aware fallback avoids collapse.
 
@@ -112,9 +112,9 @@ Therefore, it avoids blindly following adversarial predictions.
 
 Output
 
-Day 10 generates:
+Generates:
 
-experiments/day10_adversarial_prediction_failure.py
-experiments/results/day10_adversarial_prediction_failure.csv
+experiments/adversarial_prediction_failure.py
+experiments/results/adversarial_prediction_failure.csv
 figures/adversarial_prediction_failure.png
-notes/day10_adversarial_prediction_failure.md
+notes/adversarial_prediction_failure.md
