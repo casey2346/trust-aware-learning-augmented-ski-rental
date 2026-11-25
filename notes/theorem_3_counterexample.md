@@ -1,257 +1,77 @@
-# Theorem 3 Counterexample Proof Sketch
+# Proposition 3: An Adversarial Separation from Prediction-Only
 
-## Objective
+## Purpose
 
-This note gives a proof sketch for Theorem 3.
+This note gives an explicit example in which the prediction-only ski-rental policy has an unbounded competitive ratio, while the prediction-guided and trust-aware policies retain bounded costs. The example isolates the effect of imposing a buying deadline; it does not establish a new lower bound for learning-augmented algorithms.
 
-The goal is to show that trust-aware fallback prevents the unbounded degradation suffered by prediction-only policies under adversarial predictions.
+## Model and policies
 
-## Informal Statement
+Let `B > 1` be a fixed integer and `T >= 1` the unknown season length. Renting costs one per day, and buying costs `B` at the beginning of a day. A policy with integer buying day `d` pays
 
-A prediction-only algorithm can fail badly when the prediction is adversarial.
+```text
+ALG(T, B, d) = T,          if T < d
+               B + d - 1,  if T >= d.
+```
 
-In particular, if the true number of skiing days is very large but the prediction says the season is very short, then prediction-only may keep renting for the entire season.
+The offline optimum pays `OPT(T, B) = min(T, B)`. The algorithm receives a predicted duration `p`.
 
-Its cost ratio then grows with `T / B`.
+The **prediction-only** policy buys immediately when `p >= B` and otherwise rents for the whole season. The **prediction-guided** policy uses
 
-In contrast, the trust-aware algorithm falls back toward the deterministic ski-rental threshold and buys by day `B`.
+```text
+d_pred = ceil(lambda * B),  if p >= B
+         B,                 if p < B,
+```
 
-Therefore, its cost ratio remains bounded.
+where `lambda` is in `(0, 1]`. The **trust-aware** policy uses
 
-## Setting
+```text
+d_trust = ceil(c * d_pred + (1 - c) * B),
+```
 
-Let:
+where `c` is in `[0, 1]`.
 
-T = true number of skiing days
-B = buying cost
-p = predicted number of skiing days
+## Proposition
 
-The offline optimum is:
+For the prediction-only policy above, there is no finite competitive-ratio bound when predictions can be arbitrary. In contrast, on the same adversarial inputs, both bounded-threshold policies have competitive ratio `2 - 1/B` for every value of `lambda` and `c` in their stated ranges.
 
-OPT(T, B) = min(T, B)
+## Proof
 
-For an algorithm that buys on day `d`, the cost is:
+Fix any integer `B > 1` and give the algorithms the prediction
 
-ALG(T, B, d) =
-    T,            if T < d
-    (d - 1) + B,  if T ≥ d
+```text
+p = 1 < B.
+```
 
-## Prediction-Only Policy
+Now let the actual season length `T` range over integers with `T >= B`, growing without bound.
 
-The prediction-only policy fully trusts the prediction.
+**Prediction-only.** Since `p < B`, this policy never buys. It pays `T`, while the offline optimum pays `B`. Therefore
 
-A simple prediction-only rule is:
+```text
+C_prediction_only / OPT = T / B -> infinity as T -> infinity.
+```
 
-if p ≥ B:
-    buy immediately
-else:
-    rent forever
+No constant competitive-ratio bound can hold for this policy over unrestricted predictions.
 
-This rule is consistent when predictions are accurate, but it is fragile when predictions are adversarial.
+**Prediction-guided and trust-aware.** The same prediction `p < B` gives `d_pred = B`. Consequently,
 
-## Trust-Aware Fallback Policy
+```text
+d_trust = ceil(c * B + (1 - c) * B) = B
+```
 
-The trust-aware policy does not fully trust the prediction.
+for **every** confidence value `c` in `[0, 1]`. Because `T >= B`, both policies buy on day `B` and pay `2B - 1`. Their competitive ratio is exactly
 
-It uses a fallback buying threshold controlled by the deterministic ski-rental baseline.
+```text
+C_pred / OPT = C_trust / OPT = (2B - 1) / B = 2 - 1/B < 2.
+```
 
-The deterministic baseline buys on day:
+This proves the separation. The prediction error `|p - T| = T - 1` grows without bound, but the two bounded-threshold policies' ratios remain fixed in this example.
 
-d_base = B
+## What the example shows
 
-Under low confidence, the trust-aware algorithm falls back to:
+The prediction-only policy fails because an incorrect short-season forecast makes it rent throughout an arbitrarily long season. The other two policies have a finite buying deadline. On this particular input, they behave exactly like the classical deterministic baseline.
 
-d_trust = B
+This outcome **does not depend on low confidence**: when `p < B`, both thresholds are `B` for all `c`. The example therefore cannot be used to show that confidence weighting improves robustness over the prediction-guided policy. More generally, Proposition 2 gives a finite competitive-ratio guarantee for both bounded-threshold policies under arbitrary predictions.
 
-Therefore, it buys no later than the deterministic ski-rental threshold.
+The counterexample concerns the specific prediction-only rule defined here, not every possible algorithm that uses predictions. It is not an optimality result or a lower bound for the broader class of learning-augmented ski-rental algorithms.
 
-## Assumptions
-
-We assume:
-
-1. B > 0.
-2. T can be arbitrarily large.
-3. The prediction may be adversarial.
-4. The prediction-only policy rents forever when p < B.
-5. The trust-aware policy buys no later than day B under low confidence.
-
-The prediction error is:
-
-η = |p - T|
-
-In this theorem, `η` may be arbitrarily large.
-
-## Claim
-
-There exists an adversarial prediction such that the prediction-only policy has unbounded competitive ratio.
-
-However, under the same adversarial prediction, the trust-aware fallback policy remains constant-competitive.
-
-More precisely:
-
-CR_prediction_only = T / B
-
-which becomes unbounded as:
-
-T / B → ∞
-
-while:
-
-CR_trust_aware ≤ (2B - 1) / B < 2
-
-when the trust-aware algorithm falls back to buying on day `B`.
-
-## Counterexample Construction
-
-Choose a large true duration:
-
-T >> B
-
-but give the algorithm a very small prediction:
-
-p = 1
-
-Since:
-
-p < B
-
-the prediction-only policy believes the season will be short.
-
-Therefore, prediction-only rents forever.
-
-## Prediction-Only Cost
-
-Because the prediction-only policy rents forever, its cost is:
-
-C_prediction_only(T, B, p) = T
-
-Since:
-
-T >> B
-
-the offline optimum buys skis and pays:
-
-OPT(T, B) = B
-
-Therefore, the competitive ratio is:
-
-CR_prediction_only
-= C_prediction_only(T, B, p) / OPT(T, B)
-= T / B
-
-As `T` grows while `B` is fixed:
-
-T / B → ∞
-
-Thus, prediction-only suffers unbounded degradation under this adversarial prediction.
-
-## Trust-Aware Fallback Cost
-
-Now consider the trust-aware algorithm under the same adversarial prediction.
-
-Because confidence is low, the trust-aware algorithm falls back to the deterministic threshold:
-
-d_trust = B
-
-Since:
-
-T ≥ B
-
-the trust-aware algorithm rents for `B - 1` days and then buys.
-
-Therefore, its cost is:
-
-C_trust(T, B, p, c)
-= (B - 1) + B
-= 2B - 1
-
-The offline optimum is still:
-
-OPT(T, B) = B
-
-So the competitive ratio is:
-
-CR_trust_aware
-= C_trust(T, B, p, c) / OPT(T, B)
-= (2B - 1) / B
-= 2 - 1/B
-< 2
-
-Thus, trust-aware fallback remains constant-competitive.
-
-## Cost Decomposition
-
-The separation can be seen through the cost decomposition.
-
-For prediction-only:
-
-C_prediction_only = rental cost over the whole season
-                  = T
-
-There is no fallback buying threshold, so the cost grows linearly with `T`.
-
-For trust-aware fallback:
-
-C_trust = rental cost before fallback buying + buying cost
-        = (B - 1) + B
-        = 2B - 1
-
-The fallback threshold prevents the algorithm from renting forever.
-
-## Error Term
-
-The prediction error in this counterexample is:
-
-η = |p - T| = |1 - T| = T - 1
-
-As:
-
-T → ∞
-
-we have:
-
-η → ∞
-
-So the prediction error is unbounded.
-
-Prediction-only has no protection against this error, so its ratio grows as:
-
-T / B
-
-Trust-aware fallback is protected by the deterministic threshold, so its ratio remains bounded by:
-
-2 - 1/B
-
-## Interpretation
-
-This theorem shows a separation between prediction-only and trust-aware policies.
-
-Prediction-only may be highly consistent under accurate predictions, but it is not robust.
-
-Trust-aware fallback sacrifices some aggressiveness in order to prevent catastrophic failure.
-
-The key difference is:
-
-prediction-only fully trusts p
-trust-aware controls how much p can affect the buying day
-
-## Conclusion
-
-The counterexample proves that prediction-only policies can suffer unbounded degradation under adversarial predictions.
-
-When:
-
-T >> B
-p = 1
-
-prediction-only rents forever and obtains:
-
-CR_prediction_only = T / B → ∞
-
-But trust-aware fallback buys by day `B` and obtains:
-
-CR_trust_aware = 2 - 1/B < 2
-
-Therefore, trust-aware fallback prevents the unbounded degradation suffered by prediction-only policies.
-
-This establishes the proof sketch for Theorem 3.
+For the uniform robustness bound, see `notes/theorem_2_robustness.md`. The complete model and related cost comparison are given in `paper/technical_report.md`.

@@ -1,311 +1,145 @@
 # Algorithm Blocks
 
-This section formalises the four algorithms used in this project.
+This note specifies the four ski-rental policies used in the project. Each policy chooses a buying deadline before the season length is known. Predictions and confidence values, where applicable, are assumed to be available before day 1.
 
-The algorithms are written using the following notation:
+## Model and notation
 
-T = true number of skiing days, unknown to the online algorithm
-B = buying cost
-p = predicted number of skiing days
-λ = learning-augmented aggressiveness parameter, where λ ∈ (0, 1]
-c = confidence in the prediction, where c ∈ [0, 1]
+Let `B >= 1` be an integer purchase cost, `T >= 1` the unknown integer season length, and `p` a prediction of `T`. Renting costs one unit per day. Buying at the beginning of day `d` incurs the purchase cost after `d - 1` rental days. If the season ends before day `d`, no purchase is made.
 
-The project uses the following cost convention:
+```text
+ALG(T, B, d) = T,           if T < d
+               B + d - 1,   if T >= d
+OPT(T, B)    = min(T, B)
+CR           = ALG / OPT
+```
 
-If an algorithm buys on day d:
-    ALG(T, B, d) =
-        T,             if T < d
-        (d - 1) + B,   if T >= d
+For the policies below, `lambda` belongs to `(0, 1]` and confidence `c` belongs to `[0, 1]`. A buying day is a planned threshold, not a claim that a purchase occurs after the season has ended.
 
-The offline optimum is:
+## Algorithm 1 — Deterministic baseline
 
-OPT(T, B) = min(T, B)
+The classical deterministic rule ignores the prediction and buys on day `B` if the season lasts that long.
 
-The cost ratio is:
+```text
+Input: integer purchase cost B >= 1
+Set d_base = B.
+Rent on days 1 through d_base - 1, while the season continues.
+If day d_base occurs, buy at its beginning.
+```
 
-CR = ALG / OPT
+Its cost is
 
----
+```text
+C_base(T, B) = ALG(T, B, B)
+             = T,        if T < B
+               2B - 1,   if T >= B.
+```
 
-## Algorithm 1: Deterministic Ski Rental
+Its exact worst-case competitive ratio is `2 - 1/B`, attained at `T = B`. The rule has a bounded guarantee but does not use a prediction.
 
-### Description
+## Algorithm 2 — Prediction-only baseline
 
-The deterministic baseline ignores predictions and buys on day `B`.
+This deliberately simple baseline treats the forecast as decisive: it buys immediately when the predicted season is at least as long as the purchase cost, and otherwise rents throughout the actual season.
 
-This is the classical robust baseline. It does not exploit predictions, but it has a bounded worst-case competitive ratio.
+```text
+Input: B, prediction p
+If p >= B:
+    Buy at the beginning of day 1.
+Else:
+    Rent on every day of the season; never buy.
+```
 
-### Algorithm Block
+For `T >= 1`, its cost is
 
-Algorithm 1: Deterministic Ski Rental
+```text
+C_only(T, B, p) = B,   if p >= B
+                  T,   if p < B.
+```
 
-Input:
-    Buying cost B
-    True skiing process revealed online
+When `p = T`, this cost equals `OPT(T, B)` exactly. Under arbitrary predictions, however, the rule has no uniform competitive-ratio bound: for fixed `B > 1`, choosing `p = 1 < B` and letting `T` increase gives `CR = T/B`, which grows without bound. For an overestimated short season (`p >= B` but `T < B`), it instead pays `B/T` times the optimum; for a fixed integer `B`, this ratio is at most `B`.
 
-Rule:
-    Set buying day:
-        d_base = B
+These statements refer to this particular prediction-only baseline, not to every algorithm that uses predictions.
 
-    For each day t:
-        If t < d_base:
-            rent for this day
-        If t = d_base:
-            buy skis permanently
-        If the season ends before d_base:
-            never buy
+## Algorithm 3 — Prediction-guided bounded threshold
 
-Output:
-    Online cost ALG_det
+This policy uses an earlier buying deadline when the prediction indicates a long season. Otherwise, it uses the deterministic deadline.
 
-### Cost
+```text
+Input: B, prediction p, lambda in (0, 1]
+If p >= B:
+    Set d_pred = ceil(lambda * B).
+Else:
+    Set d_pred = B.
+Rent on days 1 through d_pred - 1, while the season continues.
+If day d_pred occurs, buy at its beginning.
+```
 
-ALG_det(T, B) =
-    T,             if T < B
-    (B - 1) + B,   if T >= B
+Thus
 
-When `T >= B`:
+```text
+d_pred(p, B, lambda) = ceil(lambda * B),   if p >= B
+                       B,                  if p < B
+C_guided(T, B, p, lambda) = ALG(T, B, d_pred).
+```
 
-ALG_det(T, B) = 2B - 1
-OPT(T, B) = B
-CR_det = (2B - 1) / B = 2 - 1/B
+For instance, when `B = 10` and `p >= B`, the deadlines for `lambda = 0.5`, `0.75`, and `1` are days 5, 8, and 10, respectively. A smaller `lambda` makes the buying deadline earlier in the long-season-prediction branch. Earlier buying may reduce the cost of a long season, but it may also lead to an unnecessary purchase if the season is short.
 
-Therefore, the deterministic baseline is at most 2-competitive under this convention.
+Because `ceil(lambda * B) <= d_pred <= B`, this policy has a finite worst-case competitive-ratio bound for every fixed `lambda > 0`, regardless of prediction accuracy.
 
----
+## Algorithm 4 — Confidence-weighted bounded threshold
 
-## Algorithm 2: Prediction-Only Ski Rental
+This policy interpolates between the prediction-guided deadline and the deterministic deadline. Here `c` is an externally supplied parameter; this project does not estimate or calibrate it from prediction data.
 
-### Description
+```text
+Input: B, prediction p, lambda in (0, 1], c in [0, 1]
+If p >= B:
+    Set d_pred = ceil(lambda * B).
+Else:
+    Set d_pred = B.
+Set d_trust = ceil(c * d_pred + (1 - c) * B).
+Rent on days 1 through d_trust - 1, while the season continues.
+If day d_trust occurs, buy at its beginning.
+```
 
-The prediction-only algorithm fully trusts the prediction `p`.
+The resulting cost is
 
-If the prediction suggests a long season, it buys immediately.
-If the prediction suggests a short season, it rents forever.
+```text
+C_trust(T, B, p, lambda, c) = ALG(T, B, d_trust).
+```
 
-This algorithm is useful as a fragile baseline: it performs well when predictions are accurate, but it can fail badly when predictions are wrong.
+Since `d_pred` and `B` are integers,
 
-### Algorithm Block
+```text
+d_trust = d_pred + ceil((1 - c) * (B - d_pred)).
+```
 
-Algorithm 2: Prediction-Only Ski Rental
+In particular:
 
-Input:
-    Buying cost B
-    Prediction p
+- At `c = 0`, `d_trust = B`, so the rule is the deterministic baseline.
+- At `c = 1`, `d_trust = d_pred`, so the rule is the prediction-guided policy.
+- When `p < B`, `d_pred = d_trust = B` at **every** confidence value.
+- Between the endpoints, the buying day moves in integer steps rather than changing continuously with `c`.
 
-Rule:
-    If p >= B:
-        buy immediately
-    Else:
-        rent forever
+Confidence controls the selected buying threshold, but a lower confidence does not necessarily mean a lower realised cost. The policy also does not obtain a stronger *uniform worst-case guarantee* merely by introducing `c`: the prediction-guided threshold already has the same bound.
 
-Output:
-    Online cost ALG_pred
+## Comparison and guarantees
 
-### Cost
+| Policy | Buying rule | What is established |
+| --- | --- | --- |
+| Deterministic | `d = B` | Exact worst-case ratio `2 - 1/B` |
+| Prediction-only | Buy on day 1 if `p >= B`; otherwise never buy | Optimal cost for `p = T`; unbounded ratio is possible for arbitrary predictions |
+| Prediction-guided | `d_pred = ceil(lambda * B)` if `p >= B`, otherwise `B` | Uniform bound `1 + (B - 1)/ceil(lambda * B)` |
+| Trust-aware | `d_trust = ceil(c * d_pred + (1 - c) * B)` | The same uniform bound; recovers the deterministic and prediction-guided rules at `c = 0` and `c = 1` |
 
-ALG_pred(T, B, p) =
-    B,   if p >= B and T > 0
-    T,   if p < B
+The common bound follows because both bounded-threshold policies satisfy
 
-### Failure Modes
+```text
+ceil(lambda * B) <= d <= B,
+ALG(T, B, d) / OPT(T, B)
+    <= 1 + (B - 1)/d
+    <= 1 + (B - 1)/ceil(lambda * B)
+    <= 1 + 1/lambda.
+```
 
-If `T` is small but `p >= B`, the algorithm buys unnecessarily:
+For any **fixed** integer threshold `1 <= d <= B`, the first bound is exact in the worst case, at `T = d`. The bound uniform over predictions and confidence values need not be attained for every fixed confidence setting.
 
-CR_pred = B / T
-
-This can be large when `T` is small.
-
-If `T` is large but `p < B`, the algorithm rents for too long:
-
-CR_pred = T / B
-
-This grows with `T`.
-
-Therefore, prediction-only is consistent under accurate predictions but not robust under unreliable predictions.
-
----
-
-## Algorithm 3: Learning-Augmented Ski Rental
-
-### Description
-
-The learning-augmented algorithm uses the prediction but does not yet estimate whether the prediction is trustworthy.
-
-If the prediction suggests a long season, it buys earlier than the deterministic baseline.
-
-If the prediction suggests a short season, it falls back to buying on day `B`.
-
-The parameter `λ ∈ (0, 1]` controls how aggressively the algorithm buys early.
-
-Smaller `λ` means more aggressive prediction use.
-Larger `λ` means more conservative behaviour.
-
-### Algorithm Block
-
-Algorithm 3: Learning-Augmented Ski Rental
-
-Input:
-    Buying cost B
-    Prediction p
-    Aggressiveness parameter λ ∈ (0, 1]
-
-Rule:
-    If p >= B:
-        d_pred = ceil(λB)
-    Else:
-        d_pred = B
-
-    For each day t:
-        If t < d_pred:
-            rent for this day
-        If t = d_pred:
-            buy skis permanently
-        If the season ends before d_pred:
-            never buy
-
-Output:
-    Online cost ALG_LA
-
-### Buying Day
-
-d_pred(p, B, λ) =
-    ceil(λB),   if p >= B
-    B,          if p < B
-
-### Cost
-
-ALG_LA(T, B, p, λ) = ALG(T, B, d_pred)
-
-### Interpretation of λ
-
-For example, if `B = 10`:
-
-λ = 0.5  gives d_pred = 5
-λ = 0.75 gives d_pred = 8
-λ = 1.0  gives d_pred = 10
-
-Thus:
-
-λ = 0.5  is more aggressive
-λ = 0.75 is intermediate
-λ = 1.0  recovers the deterministic baseline
-
-The learning-augmented algorithm can exploit predictions, but it still does not decide whether the prediction should be trusted.
-
----
-
-## Algorithm 4: Trust-Aware Learning-Augmented Ski Rental
-
-### Description
-
-The trust-aware algorithm is the core algorithmic contribution of this project.
-
-It introduces a confidence value:
-
-c ∈ [0, 1]
-
-The confidence controls how strongly the algorithm follows the prediction.
-
-If confidence is high, the algorithm behaves more like the learning-augmented algorithm.
-
-If confidence is low, the algorithm falls back toward the deterministic baseline.
-
-### Algorithm Block
-
-Algorithm 4: Trust-Aware Learning-Augmented Ski Rental
-
-Input:
-    Buying cost B
-    Prediction p
-    Aggressiveness parameter λ ∈ (0, 1]
-    Confidence value c ∈ [0, 1]
-
-Step 1:
-    Set deterministic baseline buying day:
-        d_base = B
-
-Step 2:
-    Compute prediction-aware buying day:
-        If p >= B:
-            d_pred = ceil(λB)
-        Else:
-            d_pred = B
-
-Step 3:
-    Blend the prediction-aware buying day with the baseline:
-        d_trust = ceil(c · d_pred + (1 - c) · d_base)
-
-Step 4:
-    For each day t:
-        If t < d_trust:
-            rent for this day
-        If t = d_trust:
-            buy skis permanently
-        If the season ends before d_trust:
-            never buy
-
-Output:
-    Online cost ALG_trust
-
-### Buying Day
-
-d_base = B
-
-d_pred =
-    ceil(λB),   if p >= B
-    B,          if p < B
-
-d_trust = ceil(c · d_pred + (1 - c) · d_base)
-
-### Cost
-
-ALG_trust(T, B, p, λ, c) = ALG(T, B, d_trust)
-
-### Special Cases
-
-If `c = 0`:
-
-d_trust = d_base = B
-
-So the algorithm recovers the deterministic baseline.
-
-If `c = 1`:
-
-d_trust = d_pred
-
-So the algorithm recovers the learning-augmented algorithm.
-
-If `0 < c < 1`, the algorithm interpolates between the robust deterministic baseline and the prediction-aware strategy.
-
-### Interpretation
-
-The trust-aware algorithm prevents blind prediction use.
-
-high confidence  -> use prediction more aggressively
-low confidence   -> fall back toward deterministic baseline
-
-This creates a controllable consistency-robustness trade-off.
-
----
-
-## Summary of Algorithms
-
-Algorithm 1: Deterministic
-    Ignores prediction.
-    Robust but cannot exploit accurate predictions.
-
-Algorithm 2: Prediction-Only
-    Fully trusts prediction.
-    Good when prediction is accurate, but fragile when prediction is wrong.
-
-Algorithm 3: Learning-Augmented
-    Uses prediction through λ.
-    Can improve performance when prediction suggests a long season.
-    Still lacks an explicit trust mechanism.
-
-Algorithm 4: Trust-Aware Learning-Augmented
-    Uses confidence c to control prediction use.
-    Falls back toward deterministic baseline when confidence is low.
-    Avoids blind prediction use under unreliable predictions.
-
+These four definitions support a controlled comparison of how buying deadlines respond to predictions and confidence. They do **not** establish an optimal consistency–robustness trade-off, show that confidence weighting outperforms the prediction-guided policy, or provide an error-sensitive guarantee. The proofs and their precise scope are in [`paper/technical_report.md`](paper/technical_report.md) and the three supporting notes under [`notes/`](notes/).

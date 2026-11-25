@@ -1,323 +1,82 @@
-# Theorem 2 Robustness Proof Sketch
+# Proposition 2: Worst-Case Robustness of Bounded Buying Thresholds
 
-## Objective
+## Purpose
 
-This note gives a proof sketch for the robustness property of the trust-aware learning-augmented ski rental algorithm.
+This note establishes a worst-case competitive-ratio bound for the bounded buying rules used in the trust-aware ski-rental project. The guarantee holds even if the duration prediction is arbitrarily wrong. It comes from the range of possible buying days, not from the confidence parameter being accurate or small.
 
-The goal is to show that even under arbitrary prediction error, the trust-aware algorithm remains constant-competitive as long as its buying threshold is controlled by the deterministic ski-rental threshold.
+## Model and buying rules
 
-## Informal Statement
+Let `B >= 1` and `T >= 1` be integers. Renting costs one unit per day, while buying costs `B` at the beginning of the chosen day. A policy that plans to buy on integer day `d >= 1` pays
 
-Predictions may be completely wrong.
+```text
+ALG(T, B, d) = T,           if T < d
+               B + d - 1,   if T >= d.
+```
 
-However, the trust-aware algorithm does not blindly follow predictions.
+The offline optimum is `OPT(T, B) = min(T, B)`.
 
-Instead, it uses a fallback mechanism that keeps the buying day close to the deterministic baseline.
+Given a duration prediction `p`, a parameter `lambda` in `(0, 1]`, and a confidence value `c` in `[0, 1]`, the prediction-guided and trust-aware thresholds are
 
-Therefore, the algorithm avoids unbounded loss from arbitrary prediction errors.
+```text
+d_pred = ceil(lambda * B),  if p >= B
+         B,                 if p < B
 
-## Setting
+d_trust = ceil(c * d_pred + (1 - c) * B).
+```
 
-Let:
+Both thresholds satisfy
 
-T = true number of skiing days
-B = buying cost
-p = predicted number of skiing days
-λ ∈ (0, 1] = prediction-aggressive buying parameter
-c ∈ [0, 1] = confidence level
+```text
+ceil(lambda * B) <= d_pred <= d_trust <= B.
+```
 
-The offline optimum is:
+These inequalities hold for every prediction `p` and every confidence value `c` in the stated ranges.
 
-OPT(T, B) = min(T, B)
+## Proposition: an exact bound for a fixed buying day
 
-For an online algorithm that buys on day `d`, the cost is:
+**Statement.** Fix integers `B >= 1` and `1 <= d <= B`. For every integer season length `T >= 1`,
 
-ALG(T, B, d) =
-    T,           if T < d
-    (d - 1) + B, if T ≥ d
+```text
+ALG(T, B, d) / OPT(T, B) <= 1 + (B - 1) / d.
+```
 
-The deterministic ski-rental baseline buys on day:
+This bound is attained at `T = d`. In particular, the worst-case competitive ratio of the fixed-threshold policy is exactly `1 + (B - 1) / d`.
 
-d_base = B
+**Proof.** If `T < d`, the algorithm rents for the entire season, paying `T`. Because `T < d <= B`, the offline optimum also pays `T`, so the ratio is one.
 
-and has cost at most:
+If `T >= d`, the algorithm buys and pays `B + d - 1`. Since `d <= B` and `T >= d`,
 
-2B - 1
+```text
+OPT(T, B) = min(T, B) >= d.
+```
 
-when the season is long.
+Therefore,
 
-## Trust-Aware Buying Day
+```text
+ALG(T, B, d) / OPT(T, B)
+    <= (B + d - 1) / d
+     = 1 + (B - 1) / d.
+```
 
-The prediction-augmented buying day is:
+At `T = d`, the algorithm buys on the final day, paying `B + d - 1`, while `OPT(d, B) = d`. Equality follows. This also covers `B = d = 1`.
 
-d_pred =
-    ceil(λB), if p ≥ B
-    B,        if p < B
+## Corollary: robustness of the prediction-guided and trust-aware policies
 
-The trust-aware buying day is:
+Because `d_pred` and `d_trust` are at least `ceil(lambda * B)`, the proposition gives, for either policy and for every `T`, `p`, and admissible `c`,
 
-d_trust = ceil(c · d_pred + (1 - c) · B)
+```text
+ALG / OPT <= 1 + (B - 1) / ceil(lambda * B)
+          <= 1 + 1 / lambda.
+```
 
-This means the trust-aware algorithm interpolates between:
+Thus both policies are constant-competitive when `lambda` is a fixed positive constant, without any assumption on prediction accuracy. The first inequality is uniform over the possible thresholds; it need not be attained by the trust-aware policy at every fixed confidence value.
 
-d_pred
+The classical deterministic baseline is the special case `d = B`, with worst-case ratio `2 - 1/B`. At `c = 0`, the trust-aware rule is exactly this baseline. At `c = 1`, it is exactly the prediction-guided rule. When `p < B`, both thresholds are `B` for every confidence value.
 
-and:
+## What the result does and does not show
 
-B
+The upper bound `d <= B` ensures that a policy cannot keep renting indefinitely on a long season. The lower bound `d >= ceil(lambda * B)` keeps it from buying arbitrarily early relative to `B`. Together, these give a finite worst-case ratio even under adversarial predictions.
 
-When confidence is low, the buying day moves back toward the deterministic threshold.
+The confidence interpolation does not create this guarantee: the prediction-guided rule already has the same uniform bound. Nor does lowering confidence always reduce cost. Delaying a purchase can help when the season ends before the new threshold, but it can increase rental cost when both policies eventually buy.
 
-When confidence is high, the algorithm can move closer to the prediction-augmented threshold.
-
-## Assumptions
-
-We assume:
-
-1. B > 0.
-2. λ ∈ (0, 1] is a fixed constant.
-3. c ∈ [0, 1].
-4. The buying day is capped by the deterministic threshold:
-       d_trust ≤ B.
-5. The buying day is not allowed to be arbitrarily early:
-       d_trust ≥ λB.
-6. Prediction error η = |p - T| may be arbitrary.
-
-The important point is that Theorem 2 does not require the prediction to be accurate.
-
-The prediction can be completely wrong.
-
-Robustness comes from the buying-day cap and fallback structure, not from prediction quality.
-
-## Claim
-
-Under arbitrary prediction error, if the trust-aware buying day satisfies:
-
-λB ≤ d_trust ≤ B
-
-for some constant:
-
-λ ∈ (0, 1]
-
-then the trust-aware algorithm is constant-competitive.
-
-More precisely:
-
-C_trust(T, B, p, c) / OPT(T, B) ≤ 1 + 1/λ
-
-Therefore:
-
-C_trust(T, B, p, c) = O(OPT(T, B))
-
-when `λ` is treated as a fixed constant.
-
-## Proof Idea
-
-The proof does not rely on the prediction being correct.
-
-Instead, it only uses the fact that the trust-aware buying day is bounded between:
-
-λB
-
-and:
-
-B
-This prevents two failure modes.
-
-First, the algorithm cannot rent forever, because it buys no later than the deterministic threshold `B`.
-
-Second, the algorithm cannot buy arbitrarily early, because it buys no earlier than `λB`.
-
-Thus, even if the prediction is adversarial, the algorithm behaves like a controlled deterministic ski-rental strategy.
-
-## Case Analysis
-
-Let:
-
-d = d_trust
-
-We analyze two cases.
-
-## Case 1: T < d
-
-If the season ends before the algorithm buys, then the algorithm only rents.
-
-Thus:
-
-C_trust(T, B, p, c) = T
-
-Since:
-
-OPT(T, B) = min(T, B)
-
-and `T < d ≤ B`, we have:
-
-OPT(T, B) = T
-
-Therefore:
-
-C_trust(T, B, p, c) / OPT(T, B) = T / T = 1
-
-So the algorithm is optimal in this case.
-
-## Case 2: T ≥ d
-
-If the season lasts until the buying day, then the algorithm rents for `d - 1` days and then buys.
-
-Thus:
-
-C_trust(T, B, p, c) = (d - 1) + B
-
-Since:
-
-d ≤ B
-
-we get:
-
-C_trust(T, B, p, c) ≤ 2B - 1
-
-Now we lower-bound the offline optimum.
-
-Because:
-
-T ≥ d
-
-and:
-
-d ≥ λB
-
-we have:
-
-T ≥ λB
-
-Therefore:
-
-OPT(T, B) = min(T, B) ≥ λB
-
-So:
-
-C_trust(T, B, p, c) / OPT(T, B)
-≤ (2B - 1) / (λB)
-≤ 2 / λ
-
-This already proves constant competitiveness for fixed `λ`.
-
-A slightly looser but simpler bound is:
-
-C_trust(T, B, p, c) / OPT(T, B) = O(1/λ)
-
-Since `λ` is fixed, this is:
-
-O(1)
-
-## Cost Decomposition
-
-The trust-aware cost can be decomposed as:
-
-C_trust(T, B, p, c)
-= rental cost before buying + buying cost
-
-When `T ≥ d_trust`, this is:
-
-C_trust(T, B, p, c)
-= (d_trust - 1) + B
-
-The fallback cap ensures:
-
-d_trust ≤ B
-
-so:
-
-C_trust(T, B, p, c) ≤ 2B - 1
-
-The lower bound:
-
-d_trust ≥ λB
-
-ensures that if the algorithm buys, then the true duration must satisfy:
-
-T ≥ λB
-
-so the offline optimum is not too small.
-
-This prevents the cost ratio from becoming unbounded.
-
-## Error Term
-
-Unlike Theorem 1, Theorem 2 does not need a small prediction error term.
-
-The prediction error:
-
-η = |p - T|
-
-may be arbitrary.
-
-The robustness bound is independent of `η`.
-
-Therefore, the error term is controlled by the algorithmic fallback structure rather than prediction accuracy.
-
-We can write:
-
-C_trust(T, B, p, c) / OPT(T, B)
-≤ O(1/λ)
-
-for all predictions `p`.
-
-Since `λ` is fixed, this becomes:
-
-C_trust(T, B, p, c) / OPT(T, B)
-≤ O(1)
-
-The important robustness message is:
-
-arbitrary prediction error does not cause unbounded competitive ratio
-
-as long as the algorithm does not buy too late or too early.
-
-## Role of Low Confidence
-
-When confidence is low:
-
-c ≈ 0
-
-the trust-aware buying day becomes close to:
-
-B
-
-because:
-
-d_trust = ceil(c · d_pred + (1 - c) · B)
-
-Thus, in low-confidence settings, the algorithm behaves similarly to the deterministic baseline.
-
-This directly prevents the algorithm from following unreliable predictions.
-
-## Conclusion
-
-The trust-aware algorithm is robust because its buying threshold is controlled.
-
-Even if the prediction is arbitrarily wrong, the algorithm remains constant-competitive when:
-
-λB ≤ d_trust ≤ B
-
-The upper bound:
-
-d_trust ≤ B
-
-prevents renting much longer than the deterministic baseline.
-
-The lower bound:
-
-d_trust ≥ λB
-
-prevents buying arbitrarily early.
-
-Therefore:
-
-C_trust(T, B, p, c) / OPT(T, B) ≤ O(1/λ)
-
-and for fixed `λ`:
-
-C_trust(T, B, p, c) / OPT(T, B) ≤ O(1)
-
-This establishes the proof sketch for Theorem 2.
+This proposition is a worst-case statement, not an error-sensitive guarantee or an optimal consistency–robustness trade-off. Establishing either would require additional analysis and, potentially, a different buying rule. The exact cost comparison under perfect predictions appears in `notes/theorem_1_consistency.md`; an adversarial separation from prediction-only is given in `notes/theorem_3_counterexample.md`.

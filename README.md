@@ -1,434 +1,112 @@
 # Trust-Aware Learning-Augmented Ski Rental under Unreliable Predictions
 
-## Main Message
+This project examines how unreliable predictions affect decisions in the classical ski-rental problem. It compares four policies: a deterministic baseline, a prediction-only policy, a bounded prediction-guided threshold, and a confidence-weighted threshold.
 
-**Prediction-only policies can fail under adversarial prediction error, while trust-aware fallback preserves robustness.**
+**Main finding:** Prediction-only can have an unbounded competitive ratio when a short-season prediction is badly wrong. Both bounded-threshold policies avoid this particular failure by buying no later than day `B`. The confidence parameter shifts the buying day; it does not, by itself, establish a stronger worst-case guarantee than the prediction-guided threshold already has.
 
-This project studies a learning-augmented version of the classical ski rental problem. The goal is to understand how online algorithms can use machine-learned predictions when they are helpful, without suffering catastrophic loss when predictions are inaccurate, biased, or adversarial.
+The full assumptions and proofs appear in [`paper/technical_report.md`](paper/technical_report.md).
 
-The core idea is simple:
+## Model
 
-Use predictions when confidence is high.
-Fall back toward the deterministic baseline when confidence is low.
+Let `T >= 1` be the unknown number of skiing days, `B >= 1` the integer purchase cost, and `p` the predicted duration. Renting costs one unit per day. Buying at the beginning of day `d` costs `B` after `d - 1` rental days.
 
----
-
-## Research Question
-
-How can an online ski-rental algorithm use predictions to improve performance while remaining robust when those predictions are unreliable?
-
-More specifically:
-
-Can we design a prediction-aware algorithm that is consistent under accurate predictions
-and still O(1)-competitive under arbitrary prediction error?
-
----
-
-## Why This Matters
-
-Learning-augmented algorithms use machine-learned predictions to improve online decision-making. These predictions can help when they are accurate, but they can also be dangerous when they are wrong.
-
-A prediction-only policy may look strong under accurate predictions, but it can fail badly under adversarial predictions. For example, if the true season is long but the prediction says the season is short, the policy may keep renting forever.
-
-This project targets an active but still underdeveloped problem: robust online decision-making with unreliable learned predictions.
-
----
-
-## Problem Setting
-
-In the classical ski rental problem:
-
-T = true number of skiing days
-B = buying cost
-p = predicted number of skiing days
-
-Renting costs `1` per day. Buying costs `B` once.
-
-The offline optimum is:
-
+```text
 OPT(T, B) = min(T, B)
+ALG(T, B, d) = T,         if T < d
+               B + d - 1, if T >= d
+CR(T, B, d) = ALG(T, B, d) / OPT(T, B)
+```
 
-If an online algorithm buys on day `d`, its cost is:
+The absolute prediction error is `eta = |p - T|`.
 
-ALG(T, B, d) =
-    T,             if T < d
-    (d - 1) + B,   if T ≥ d
+## The four policies
 
-The competitive ratio is:
+| Policy | Decision |
+| --- | --- |
+| Deterministic | Buy on day `B`. Its worst-case competitive ratio is `2 - 1/B`. |
+| Prediction-only | Buy immediately if `p >= B`; otherwise rent throughout the season. |
+| Prediction-guided | Buy on `d_pred = ceil(lambda * B)` if `p >= B`; otherwise buy on day `B`. |
+| Trust-aware | Buy on `d_trust = ceil(c * d_pred + (1-c) * B)`. |
 
-CR = ALG / OPT
+Here `lambda` is in `(0, 1]` and confidence `c` is in `[0, 1]`. At `c = 0`, trust-aware is identical to the deterministic baseline; at `c = 1`, it is identical to the prediction-guided policy. When `p < B`, both buying thresholds are `B` and confidence changes nothing. Integer rounding means the threshold changes in steps, not continuously.
 
----
+## What can be proved
 
-## Algorithms Implemented
+**Perfect prediction.** When `p = T`, the exact difference between the trust-aware and prediction-guided costs is
 
-This repository implements and compares four main algorithms.
+```text
+C_trust - C_pred = ceil((1-c) * (B-d_pred)) >= 0.
+```
 
-### 1. Deterministic Baseline
+At `c = 1` the costs coincide. When `d_pred < B`, the difference can remain one for `c < 1` arbitrarily close to one. Thus, continuous convergence as `c` approaches one from below would be an incorrect claim.
 
-The classical deterministic ski-rental algorithm buys on day:
+**Bounded buying thresholds.** For any fixed integer `1 <= d <= B`,
 
-d_base = B
+```text
+ALG(T, B, d) / OPT(T, B) <= 1 + (B-1)/d.
+```
 
-It is robust and has competitive ratio below `2`, but it does not use predictions.
+The bound is attained at `T = d`. Because both bounded policies buy no earlier than `ceil(lambda * B)`, they satisfy, for any prediction and confidence,
 
-### 2. Prediction-Only Policy
+```text
+ALG / OPT <= 1 + (B-1)/ceil(lambda * B) <= 1 + 1/lambda.
+```
 
-The prediction-only policy fully trusts the prediction:
+The finite bound follows from the threshold range; it is not a newly established optimal consistency–robustness trade-off.
 
-if p ≥ B:
-    buy immediately
-else:
-    rent forever
+**Adversarial example.** For fixed `B > 1`, take `p = 1 < B` and let `T` grow. Prediction-only rents throughout the season, so its competitive ratio is `T/B` and grows without bound as `T` increases. Both bounded policies buy on day `B` in this example, with ratio `2 - 1/B` for `T >= B`, independently of confidence.
 
-It can perform very well when predictions are accurate, but it can suffer unbounded loss when predictions are adversarial.
+These statements concern the defined policies. They are not a general lower bound for all learning-augmented online algorithms.
 
-### 3. Learning-Augmented Policy
+## Experiments and figures
 
-The learning-augmented policy uses a prediction-based buying threshold:
+The scripts evaluate synthetic predictions, signed over- and underestimation, confidence levels, alternative `lambda` values, and adversarial scenarios. Main parameter choices include `B` in `{10, 20, 50}`, `T` from `1` to `5B`, and confidence in `{0, 0.25, 0.5, 0.75, 1}`; individual scripts use subsets. The experiments illustrate the mathematical behavior, rather than prove the bounds.
 
-d_pred =
-    ceil(λB), if p ≥ B
-    B,        if p < B
+- **Signed error sweep:** [`figures/error_sweep.png`](figures/error_sweep.png) — predictions above and below the true duration.
+- **Error versus cost ratio:** [`figures/error_sweep_cost_ratio.png`](figures/error_sweep_cost_ratio.png) — average cost ratio over sampled durations.
+- **Duration sweep:** [`figures/duration_sweep.png`](figures/duration_sweep.png) — behavior under adversarial predictions.
+- **Confidence ablation:** [`figures/confidence_ablation.png`](figures/confidence_ablation.png) — average ratio versus confidence.
+- **Adversarial cases:** [`figures/adversarial_prediction_failure.png`](figures/adversarial_prediction_failure.png) — four misleading or biased prediction settings, with confidence fixed at `c = 0` in this experiment.
 
-where:
+The adversarial-cases script fixes `c = 0`, so its trust-aware curve is the deterministic baseline; this figure is meant to illustrate prediction-only failures, not the effect of confidence. Confidence is varied separately in `experiments/adversarial_test.py` and shown in `figures/confidence_ablation.png`. At `c = 1`, trust-aware coincides with the prediction-guided policy.
 
-λ ∈ (0, 1]
+## Reproduce the results
 
-A smaller `λ` means more aggressive early buying.
-
-### 4. Trust-Aware Learning-Augmented Policy
-
-The trust-aware algorithm interpolates between the prediction-augmented threshold and the deterministic threshold:
-
-d_trust = ceil(c · d_pred + (1 - c) · B)
-
-where:
-
-c ∈ [0, 1]
-
-is the confidence level.
-
-Special cases:
-
-c = 1  → fully trust the prediction-augmented threshold
-c = 0  → fall back to the deterministic baseline
-
----
-
-## Theoretical Claims
-
-The project contains three proof sketches.
-
-### Theorem 1: Consistency
-
-When prediction is accurate and confidence is high, the trust-aware algorithm approaches the prediction-augmented cost.
-
-Informally:
-
-c → 1 and η → 0
-⇒ C_trust(T, B, p, c) → C_pred(T, B, p)
-
-where:
-
-η = |p - T|
-
-The proof sketch is in:
-
-notes/theorem_1_consistency.md
-
-### Theorem 2: Robustness
-
-Under arbitrary prediction error, if the trust-aware buying threshold is controlled by the deterministic threshold, the algorithm remains constant-competitive.
-
-A representative condition is:
-
-λB ≤ d_trust ≤ B
-
-Then:
-
-C_trust / OPT ≤ O(1 / λ)
-
-For fixed `λ`, this is:
-
-O(1)
-
-The proof sketch is in:
-
-notes/theorem_2_robustness.md
-
-### Theorem 3: Adversarial Separation
-
-Prediction-only policies can suffer unbounded degradation under adversarial predictions.
-
-Counterexample:
-
-T >> B
-p = 1
-
-Prediction-only rents forever:
-
-C_prediction_only = T
-OPT = B
-CR_prediction_only = T / B → ∞
-
-Trust-aware fallback buys by day `B`:
-
-C_trust = 2B - 1
-CR_trust = 2 - 1/B < 2
-
-The proof sketch is in:
-
-notes/theorem_3_counterexample.md
-
----
-
-## Main Experiment Results
-
-### 1. Signed Prediction Error Sweep
-
-The signed error sweep tests both overestimation and underestimation.
-
-Overestimate:
-
-p = T · (1 + error_fraction)
-
-Underestimate:
-
-p = T · (1 - error_fraction)
-
-The key result is that prediction-only can look strong under overestimation but fails under severe underestimation.
-
-![Signed prediction error sweep](figures/signed_error_sweep_cost_ratio.png)
-
----
-
-### 2. Prediction Error vs Cost Ratio
-
-This figure shows how the average cost ratio changes as prediction error increases.
-
-![Prediction error vs cost ratio](figures/error_sweep_cost_ratio.png)
-
----
-
-### 3. True Duration vs Cost Ratio
-
-This figure shows how different algorithms behave across true season lengths under adversarial predictions.
-
-![Duration sweep](figures/duration_sweep.png)
-
----
-
-### 4. Confidence Level vs Cost Ratio
-
-This figure shows how the trust-aware algorithm changes as confidence increases.
-
-The main pattern is:
-
-higher confidence → more prediction-dependent
-lower confidence  → more robust fallback behavior
-
-![Confidence ablation](figures/confidence_ablation.png)
-
----
-
-### 5. Adversarial Prediction Failure
-
-This is the most important figure.
-
-It shows four adversarial or biased prediction cases:
-
-Case 1: small T, very large prediction
-Case 2: large T, very small prediction
-Case 3: systematic overestimate
-Case 4: systematic underestimate
-
-The key takeaway is that prediction-only can fail badly, while trust-aware fallback remains controlled.
-
-![Adversarial prediction failure](figures/adversarial_prediction_failure.png)
-
----
-
-## How to Reproduce
-
-### 1. Clone the repository
+From the repository root, with Python 3 installed:
 
 ```bash
 git clone https://github.com/casey2346/trust-aware-learning-augmented-ski-rental.git
 cd trust-aware-learning-augmented-ski-rental
-```
-
-### 2. Create and activate a Python environment
-
-```bash
 python3 -m venv .venv
 source .venv/bin/activate
-```
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Run all experiments
-
-```bash
+python3 -m pip install -r requirements.txt
 PYTHONPATH=. python3 experiments/run_all.py
 ```
-If successful, the terminal should end with:
 
-All main experiments completed successfully.
+This entry point runs the main experiment scripts and writes results under `experiments/results/` and `figures/`. The signed error sweep is implemented in `experiments/error_sweep.py`.
 
-### 5. Regenerate key figures individually
-
-Run the signed prediction error sweep:
-
-```bash
-PYTHONPATH=. python3 experiments/signed_error_sweep.py
-```
-
-Run the prediction error sweep:
+To regenerate selected figures individually:
 
 ```bash
 PYTHONPATH=. python3 experiments/error_sweep.py
-```
-Run the adversarial prediction test:
-
-```bash
 PYTHONPATH=. python3 experiments/adversarial_test.py
-```
-
-Generate the report-ready figures:
-
-```bash
 PYTHONPATH=. python3 experiments/make_figures.py
-```
-
-Run the adversarial prediction failure experiment:
-
-```bash
 PYTHONPATH=. python3 experiments/adversarial_prediction_failure.py
 ```
 
----
+## Where to look
 
-## Repository Structure
-
-```text
-trust-aware-learning-augmented-ski-rental/
-├── src/
-│   ├── ski_rental/
-│   │   ├── problem.py
-│   │   ├── baselines.py
-│   │   ├── prediction_only.py
-│   │   ├── learning_augmented.py
-│   │   └── trust_aware.py
-│   └── predictors/
-│       └── noise_models.py
-├── experiments/
-│   ├── baseline_curve.py
-│   ├── prediction_only_curve.py
-│   ├── noise_models.py
-│   ├── learning_augmented_curve.py
-│   ├── trust_aware_curve.py
-│   ├── error_sweep.py
-│   ├── signed_error_sweep.py
-│   ├── make_figures.py
-│   ├── adversarial_prediction_failure.py
-│   ├── adversarial_test.py
-│   ├── run_all.py
-│   └── results/
-├── figures/
-│   ├── deterministic_competitive_ratio.png
-│   ├── prediction_only_cost_ratio.png
-│   ├── noise_models_predictions.png
-│   ├── learning_augmented_lambdas.png
-│   ├── trust_aware_fallback.png
-│   ├── error_sweep.png
-│   ├── adversarial_test.png
-│   ├── signed_error_sweep_cost_ratio.png
-│   ├── error_sweep_cost_ratio.png
-│   ├── duration_sweep.png
-│   ├── confidence_ablation.png
-│   └── adversarial_prediction_failure.png
-├── notes/
-│   ├── problem_definition.md
-│   ├── classical_baseline.md
-│   ├── prediction_only.md
-│   ├── prediction_error_model.md
-│   ├── learning_augmented.md
-│   ├── trust_aware.md
-│   ├── algorithm_blocks.md
-│   ├── experiment_framework.md
-│   ├── first_figures.md
-│   ├── adversarial_prediction_failure.md
-│   ├── signed_error_and_bias_improvement.md
-│   ├── code_cleanup.md
-│   ├── theorem_1_consistency.md
-│   ├── theorem_2_robustness.md
-│   └── theorem_3_counterexample.md
-├── paper/
-│   ├── algorithm_blocks.md
-│   └── technical_report.md
-├── requirements.txt
-├── README.md
-└── .gitignore
-```
-
-### Main Files
-
-**Core implementation:** `src/ski_rental/` and `src/predictors/noise_models.py`.
-
-**Experiments:** `experiments/run_all.py`, `experiments/error_sweep.py`, `experiments/signed_error_sweep.py`, `experiments/adversarial_test.py`, `experiments/make_figures.py`, and `experiments/adversarial_prediction_failure.py`.
-
-**Main figures:** `figures/error_sweep.png`, `figures/signed_error_sweep_cost_ratio.png`, `figures/error_sweep_cost_ratio.png`, `figures/duration_sweep.png`, `figures/confidence_ablation.png`, and `figures/adversarial_prediction_failure.png`.
-
-**Theory notes:** `notes/theorem_1_consistency.md`, `notes/theorem_2_robustness.md`, and `notes/theorem_3_counterexample.md`.
-
----
+The core cost and policy implementations are in [`src/ski_rental/`](src/ski_rental/), with prediction utilities in [`src/predictors/`](src/predictors/). The reproducible experiments are in [`experiments/`](experiments/). The technical report provides the definitive mathematical statements; [`notes/`](notes/) contains supporting and exploratory explanations. The supporting notes should use the same assumptions and bounds as the report.
 
 ## Limitations
 
-This project is a research-style prototype and has several limitations.
+The confidence parameter is supplied manually rather than estimated from calibrated predictions. The experiments are synthetic and do not test distribution shift or real prediction traces. The proposed interpolation is deliberately simple and is not proven to outperform other bounded-threshold policies or the best known learning-augmented ski-rental algorithms.
 
-First, confidence `c` is manually specified rather than learned from data.
-
-Second, the experiments use synthetic prediction errors rather than real prediction traces.
-
-Third, the theoretical results are currently proof sketches rather than fully formal proofs.
-
-Fourth, the trust-aware rule uses a simple convex interpolation between `d_pred` and `B`; other trust mechanisms may produce better trade-offs.
-
-Fifth, the ski rental problem is intentionally simple, so future work is needed to test whether similar trust-aware fallback ideas transfer to more complex online decision problems.
-
----
-
-## Future Work
-
-Future directions include:
-
-1. learning confidence automatically from historical prediction error;
-2. tightening the theoretical competitive-ratio bounds;
-3. extending the method to randomized ski rental;
-4. testing on real or semi-real prediction traces;
-5. applying trust-aware fallback to caching, scheduling, and resource allocation;
-6. turning the proof sketches into fully formal theorem proofs.
-
----
+Useful next steps are to calibrate confidence, test real or semi-real traces, compare against stronger published baselines, and investigate genuinely error-sensitive bounds. A better worst-case theorem would require a different algorithmic insight, not just rewording the present bound.
 
 ## References
 
-[1] A. R. Karlin, M. S. Manasse, L. Rudolph, and D. D. Sleator. Competitive snoopy caching. Algorithmica, 1988.
-
-[2] A. Borodin and R. El-Yaniv. Online Computation and Competitive Analysis. Cambridge University Press, 1998.
-
-[3] T. Lykouris and S. Vassilvitskii. Competitive caching with machine learned advice. International Conference on Machine Learning, 2018.
-
-[4] M. Purohit, Z. Svitkina, and R. Kumar. Improving online algorithms via ML predictions. Advances in Neural Information Processing Systems, 2018.
-
-[5] M. Mitzenmacher. Scheduling with predictions and the price of misprediction. ITCS, 2020.
-
-[6] S. Angelopoulos, C. Dürr, S. Jin, S. Kamali, and M. Renault. Online computation with untrusted advice. ITCS, 2020.
-
-[7] Y. Shin, C. Lee, G. Lee, and H.-C. An. Improved learning-augmented algorithms for the multi-option ski rental problem via best-possible competitive analysis. ICML, 2023.
+- Borodin, A., and El-Yaniv, R. *Online Computation and Competitive Analysis*. Cambridge University Press, 1998.
+- Lykouris, T., and Vassilvitskii, S. *Competitive Caching with Machine Learned Advice*. ICML, 2018.
+- Purohit, M., Svitkina, Z., and Kumar, R. *Improving Online Algorithms via ML Predictions*. NeurIPS, 2018.
+- Angelopoulos, S., Dürr, C., Jin, S., Kamali, S., and Renault, M. *Online Computation with Untrusted Advice*. ITCS, 2020.

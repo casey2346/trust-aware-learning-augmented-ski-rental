@@ -1,248 +1,85 @@
-# Theorem 1 Consistency Proof Sketch
+# Proposition 1: Cost Comparison under Perfect Predictions
 
-## Objective
+## Purpose
 
-This note gives a proof sketch for the consistency property of the trust-aware learning-augmented ski rental algorithm.
+This note examines how confidence affects the cost of a trust-aware buying threshold in the discrete ski-rental problem. The main result is an exact comparison with the prediction-guided policy when the predicted season length is correct. It does not claim an optimal consistency–robustness trade-off or a general error-sensitive bound.
 
-The goal is to show that when the prediction is accurate and the confidence level is high, the trust-aware algorithm approaches the prediction-augmented algorithm.
+## Model and policies
 
-## Setting
+Let `B >= 1` and `T >= 1` be integers. Renting costs one unit per day; buying costs `B` at the beginning of the chosen day. If a policy plans to buy on integer day `d >= 1`, its cost is
 
-Let:
+```text
+ALG(T, B, d) = T,           if T < d
+               B + d - 1,   if T >= d.
+```
 
-T = true number of skiing days
-B = buying cost
-p = predicted number of skiing days
-λ ∈ (0, 1] = prediction-aggressive buying parameter
-c ∈ [0, 1] = confidence level
+The offline optimum is `OPT(T, B) = min(T, B)`. A prediction `p` estimates `T`. We assume `lambda` is in `(0, 1]` and confidence `c` is in `[0, 1]`.
 
-The offline optimum is:
+The prediction-guided buying threshold is
 
-OPT(T, B) = min(T, B)
+```text
+d_pred = ceil(lambda * B),  if p >= B
+         B,                 if p < B.
+```
 
-For any online algorithm that buys on day `d`, the cost is:
+The trust-aware threshold is
 
-ALG(T, B, d) =
-    T,           if T < d
-    (d - 1) + B, if T ≥ d
+```text
+d_trust = ceil(c * d_pred + (1 - c) * B).
+```
 
-## Prediction-Augmented Algorithm
+Write `C_pred = ALG(T, B, d_pred)` and `C_trust = ALG(T, B, d_trust)`. Both thresholds are integers in `[1, B]`, with `d_pred <= d_trust <= B`.
 
-The prediction-augmented algorithm uses the prediction directly.
+## Proposition: exact cost difference with a perfect prediction
 
-Its buying day is:
+**Statement.** Suppose `p = T`. Then
 
-d_pred =
-    ceil(λB), if p ≥ B
-    B,        if p < B
+```text
+C_trust - C_pred = ceil((1 - c) * (B - d_pred)) >= 0.
+```
 
+In particular, at `c = 1` the two policies have identical costs. For `d_pred < B`, however, their costs need not converge as `c` approaches `1` from below: the gap remains one for every `c < 1` sufficiently close to `1`.
 
-Let the prediction-augmented cost be:
+**Proof.** Since `d_pred` is an integer,
 
-C_pred(T, B, p) = ALG(T, B, d_pred)
+```text
+d_trust
+  = ceil(d_pred + (1 - c) * (B - d_pred))
+  = d_pred + ceil((1 - c) * (B - d_pred)).
+```
 
-## Trust-Aware Algorithm
+There are two cases.
 
-The trust-aware algorithm interpolates between the deterministic baseline and the prediction-augmented buying day.
+If `T < B`, the perfect prediction gives `p < B`, so `d_pred = B` and `d_trust = B`. Neither policy buys, and both pay `T`. The stated difference is zero.
 
-The deterministic baseline buying day is:
+If `T >= B`, then `p >= B`. Both thresholds are at most `B`, so both policies buy during the season. Their costs are `B + d_pred - 1` and `B + d_trust - 1`. Subtracting gives
 
-d_base = B
+```text
+C_trust - C_pred
+  = d_trust - d_pred
+  = ceil((1 - c) * (B - d_pred)).
+```
 
-The trust-aware buying day is:
+This proves the identity in both cases.
 
-d_trust = ceil(c · d_pred + (1 - c) · d_base)
+At `c = 1`, the ceiling term vanishes. If `d_pred < B` and `c < 1`, the quantity `(1 - c) * (B - d_pred)` is positive. Whenever it is less than one, its ceiling equals one. Thus, as `c` approaches one from below, the cost gap remains one and drops to zero only at `c = 1`. This is a consequence of integer rounding, not an approximation error. `QED`.
 
-Since `d_base = B`, this becomes:
+## Why the scope matters
 
-d_trust = ceil(c · d_pred + (1 - c) · B)
+The proposition compares the two threshold policies **only when `p = T`**. It does not show that either policy is optimal under a perfect prediction. In particular, for `T >= B`, even a perfect prediction can lead the prediction-guided policy to rent for several days before buying.
 
-Let the trust-aware cost be:
+Nor can a small difference in buying days be used to bound the cost difference for arbitrary seasons. For example, take `B = 10`, `T = 8`, `p = 10`, and `lambda = 0.8`. Then `d_pred = 8`. With `c = 0.5`, the trust-aware threshold is `d_trust = 9`. The prediction-guided policy buys on day 8 and costs 17, while the trust-aware policy never buys and costs 8. A one-day threshold change produces a cost difference of nine.
 
-C_trust(T, B, p, c) = ALG(T, B, d_trust)
+Consequently, the inequality
 
-## Assumptions
+```text
+|C_trust - C_pred| <= |d_trust - d_pred|
+```
 
-We assume:
+is false in general. This note also does not establish a bound such as `C_trust <= C_pred + O((1-c)B + |p-T|)` for unrestricted predictions and seasons.
 
-1. B > 0.
-2. λ ∈ (0, 1].
-3. c ∈ [0, 1].
-4. The prediction error is η = |p - T|.
-5. The prediction is accurate, so η is small.
-6. The prediction is not exactly on the decision boundary, so p and T are not unstable around B.
+## Interpretation
 
-The last assumption avoids the special case where a very small prediction error changes whether the algorithm treats the season as short or long.
+The confidence parameter moves the proposed buying day between `d_pred` and the deterministic threshold `B`. At full confidence the rules coincide exactly. Under a perfect prediction, the extra cost of the trust-aware rule can be calculated precisely, including the rounding effect.
 
-## Claim
-
-When the prediction is accurate and confidence is high, the trust-aware algorithm approaches the prediction-augmented algorithm.
-
-More precisely:
-
-C_trust(T, B, p, c) ≤ C_pred(T, B, p) + O((1 - c)B + η)
-
-In particular, when confidence approaches one and prediction error approaches zero:
-
-c → 1
-η → 0
-
-we have:
-
-C_trust(T, B, p, c) → C_pred(T, B, p)
-
-Thus, the trust-aware algorithm is consistent with the prediction-augmented algorithm under accurate predictions and high confidence.
-
-## Proof Idea
-
-The trust-aware algorithm differs from the prediction-augmented algorithm only through its buying day.
-
-The prediction-augmented algorithm buys on:
-
-d_pred
-
-The trust-aware algorithm buys on:
-
-d_trust = ceil(c · d_pred + (1 - c) · B)
-
-When `c = 1`, we get:
-
-d_trust = ceil(d_pred) = d_pred
-
-Therefore, the trust-aware algorithm is exactly the prediction-augmented algorithm when confidence is one.
-
-When `c` is close to one, the trust-aware buying day is close to the prediction-augmented buying day.
-
-## Buying-Day Difference
-
-Ignoring the ceiling operation for the moment:
-
-d_trust - d_pred
-≈ c · d_pred + (1 - c) · B - d_pred
-
-Simplifying:
-
-d_trust - d_pred
-≈ (1 - c)(B - d_pred)
-
-Therefore:
-
-|d_trust - d_pred| ≤ (1 - c)|B - d_pred| + 1
-
-The `+1` term comes from the ceiling operation.
-
-Since:
-
-d_pred ∈ [ceil(λB), B]
-
-we have:
-
-|B - d_pred| ≤ B
-
-Thus:
-
-|d_trust - d_pred| ≤ (1 - c)B + 1
-
-This shows that the trust-aware buying day approaches the prediction-augmented buying day as confidence increases.
-
-## Cost Decomposition
-
-We decompose the trust-aware cost as:
-
-C_trust(T, B, p, c)
-= C_pred(T, B, p)
-  + [C_trust(T, B, p, c) - C_pred(T, B, p)]
-
-The second term is the cost difference caused by changing the buying day from `d_pred` to `d_trust`.
-
-Changing the buying day by `k` days changes the rental part of the cost by at most `k`.
-
-Therefore:
-
-|C_trust(T, B, p, c) - C_pred(T, B, p)|
-≤ |d_trust - d_pred|
-
-Using the buying-day bound:
-
-|C_trust(T, B, p, c) - C_pred(T, B, p)|
-≤ (1 - c)B + 1
-
-So:
-
-C_trust(T, B, p, c)
-≤ C_pred(T, B, p) + (1 - c)B + 1
-
-## Prediction Error Term
-
-Let:
-
-η = |p - T|
-
-When the prediction is accurate, `η` is small.
-
-If `p` and `T` are on the same side of the buying threshold `B`, then the prediction-augmented algorithm makes the same high-level decision it would make under the true duration.
-
-In this stable case, prediction error only contributes a small perturbation term.
-
-We can write the consistency statement as:
-
-C_trust(T, B, p, c)
-≤ C_pred(T, B, p) + O((1 - c)B + η)
-
-The term:
-
-(1 - c)B
-
-measures the loss from not fully trusting the prediction.
-
-The term:
-
-η
-
-measures the loss from prediction inaccuracy.
-
-## Limit Case
-
-If:
-
-c = 1
-
-then:
-
-d_trust = d_pred
-
-and therefore:
-
-C_trust(T, B, p, 1) = C_pred(T, B, p)
-
-If additionally:
-
-η = 0
-
-then the prediction is exact:
-
-p = T
-
-So the trust-aware algorithm behaves exactly like the prediction-augmented algorithm under perfect prediction and full confidence.
-
-## Conclusion
-
-The trust-aware algorithm is consistent in the following sense:
-
-accurate prediction + high confidence
-⇒ trust-aware cost approaches prediction-augmented cost
-
-The main reason is that the trust-aware buying day is a convex interpolation between the deterministic buying day and the prediction-augmented buying day.
-
-As confidence approaches one, this interpolation collapses to the prediction-augmented buying day.
-
-Therefore:
-
-C_trust(T, B, p, c) → C_pred(T, B, p)
-
-as:
-
-c → 1
-η → 0
-
-This establishes the proof sketch for Theorem 1.
+A stronger claim about consistency relative to the offline optimum, or about how performance depends quantitatively on prediction error, would require a separate theorem with its own assumptions and proof. The worst-case guarantees for the bounded thresholds are treated in `notes/theorem_2_robustness.md` and in the technical report.
